@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
         urlPatterns = {"/LoginServlet"},
         initParams = {
                 @WebInitParam(name = "user", value = "Admin"),
-                @WebInitParam(name = "password", value = "123456")
+                @WebInitParam(name = "password", value = "Admin@123")
         }
     )
 public class LoginServlet extends HttpServlet {
@@ -29,12 +29,24 @@ public class LoginServlet extends HttpServlet {
         // get servlet config init params
         String userName = getServletConfig().getInitParameter("user");
         String password = getServletConfig().getInitParameter("password");
+        // user name regex
+        Pattern userPattern = Pattern.compile("^([A-Z][a-zA-Z]{2,}[ ]?)+$");
+        Matcher userMatcher = userPattern.matcher(user);
+        // password regex
+        Pattern passwordPattern = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*#?&]{1})[A-Za-z\\d@$!%*?&]{8,}$");
+        Matcher passwordMatcher = passwordPattern.matcher(pwd);
         // validating user name
-        Pattern pattern = Pattern.compile("^([A-Z][a-zA-Z]{2,}[ ]?)+$");
-        Matcher matcher = pattern.matcher(user);
-        if (!matcher.matches()) {
+        if (!userMatcher.matches()) {
             PrintWriter out = resp.getWriter();
             out.println("<font color=red>Invalid UserName</font>");
+            RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/login.html");
+            requestDispatcher.include(req, resp);
+            return;
+        }
+        // validating password
+        if (!passwordMatcher.matches()) {
+            PrintWriter out = resp.getWriter();
+            out.println("<font color=red>Invalid Password</font>");
             RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher("/login.html");
             requestDispatcher.include(req, resp);
             return;
